@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Calculer le numéro de semaine à partir de la commande date:
+
+WEEKOFFSET=$[ $(date +"%V") % 2 ]
+
+# Tester si il y a un reste.  Si pas de reste, c'est une semaine paire donc envoyer un message.
+# Sinon, ne rien faire.
+
+if [ $WEEKOFFSET -eq "0" ]; then
+    wget "http://ip_de_ojn/ojn/FR/api.jsp?sn=NABZ_MAC&token=violet_api_token&tts=Il faut sortir les poubelles bleu?" -O /dev/null
+else
+    wget "http://ip_de_ojn/ojn/FR/api.jsp?sn=NABZ_MAC&token=violet_api_token&tts=Il faut sortir les poubelles verte?" -O /dev/null
+fi

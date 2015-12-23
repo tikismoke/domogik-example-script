@@ -1,0 +1,1 @@
+ssh -i /user/.ssh/id_votrecle user@ip_client 'omxplayer /path_to_a_sound_file.wav\' >/dev/null 2>&1
