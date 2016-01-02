@@ -1,0 +1,141 @@
+#!/bin/bash
+
+##############################################################################
+# @Author : zadmalck <zadmalck at gmail.com>
+# @Purpose: Script for Domogik device for plugin script
+# @Copyleft: (C) 2015 by zadmalck
+# @license: GPL(v3)
+# @Coding: utf-8
+
+# @Warning: Before using this script in Domogik is, run it in a terminal of
+#           your raspbian Jessie on your Raspberry PI 2 system.
+#
+#           This script is licensed under the GPL. The author does not 
+#           guarantee results and can not be held responsible for damage 
+#           to your systems.
+#
+##############################################################################
+#
+# Return column of df -h
+# run ./sensor_df -h
+# for usage
+# 
+##############################################################################
+
+
+## prerequisites commands 
+
+## grep, awk, sed
+ 
+## constants exit code 
+
+E_OK=0
+E_ERROR=1
+E_HELP=2
+RETURN_NUMERIC=0
+
+## Variable init
+
+SCRIPTNAME=$(basename $0)
+
+## Default param
+
+DEVICE="/dev/root"
+## COLUMN = total | used | free
+COLUMN="default"
+
+
+## Functions
+
+function print_usage() {
+  echo "Usages:"
+  echo "For help:"
+  echo " ./$SCRIPTNAME -h"
+  echo "For return string value of column % Used from the device /dev/sda1:"
+  echo " ./$SCRIPTNAME -d /dev/sda1"
+  echo "For return numerical value of column % Used from the device /dev/sda1:"
+  echo " ./$SCRIPTNAME -d /dev/sda1 -n"
+  echo "The default device is /dev/root"
+  echo "The default column is column % used [ you can use total or used too ]"
+  echo "The default return value is string"
+  echo "For return string value of column % Used from the device /dev/root:"
+  echo " ./$SCRIPTNAME"
+}
+
+## Main program
+
+while getopts D:d:C:c:NnHh OPT
+do
+  case $OPT in
+    [Dd]) DEVICE=$OPTARG
+          ;;
+    [Cc]) COLUMN=$OPTARG
+          ;;
+    [Nn]) RETURN_NUMERIC=1
+          ;;
+    [Hh])
+      print_usage
+      exit $E_HELP
+      ;;
+    :)
+      echo "$SCRIPTNAME Error: Option $OPTARG requieres an argument."
+      exit $E_ERROR
+      ;;
+    \?)
+      echo "$SCRIPTNAME Error: Incorrect Option : $OPTARG"
+      exit $E_ERROR
+      ;; 
+   esac
+done
+
+GREP=$(which grep)
+if [ ! ${GREP} ]; then
+ echo "Error ${SCRIPTNAME} : No command system found !"
+ echo "sudo apt-get install grep";
+ echo "for install it."
+ exit ${E_ERROR}
+fi
+
+AWK=$(which awk)
+if [ ! ${GREP} ]; then
+ echo "Error ${SCRIPTNAME} : No command system found !"
+ echo "sudo apt-get install awk";
+ echo "for more informations for install it."
+ exit ${E_ERROR}
+fi
+
+SED=$(which sed)
+if [ ! ${SED} ]; then
+ echo "Error ${SCRIPTNAME} : No command system found !"
+ echo "sudo apt-get install sed";
+ echo "for install it."
+ exit ${E_ERROR}
+fi
+
+IFDEVICES=$(df -h | ${AWK} -F" " '{print $1}' | ${SED} 1d | ${GREP} ${DEVICE} | wc -l)
+if [ ${IFDEVICES} -eq 0 ]; then
+ echo "Error ${SCRIPTNAME} : No device found [${DEVICE}] !"
+ echo "Please, verify your mounted device by df -h";
+ exit ${E_ERROR}
+fi
+
+case "${COLUMN}" in
+
+total) RESULT_STRING=$(df -h | ${GREP} ${DEVICE} | ${AWK} -F" " '{print $2}')
+       ;;
+used)  RESULT_STRING=$(df -h | ${GREP} ${DEVICE} | ${AWK} -F" " '{print $3}')
+       ;;
+free)  RESULT_STRING=$(df -h | ${GREP} ${DEVICE} | ${AWK} -F" " '{print $4}')
+       ;;
+*)     RESULT_STRING=$(df -h | ${GREP} ${DEVICE} | ${AWK} -F" " '{print $5}')
+       ;;
+esac
+
+if [ $RETURN_NUMERIC -eq 1 ]; then
+ RESULT_STRING=${RESULT_STRING%?}
+fi
+
+echo -n "${RESULT_STRING}"
+
+exit ${E_OK}
+

@@ -1,0 +1,60 @@
+#!/bin/bash
+
+##############################################################################
+# @Author : zadmalck <zadmalck at gmail.com>
+# @Purpose: Script for Domogik device for plugin script
+# @Copyleft: (C) 2015 by zadmalck
+# @license: GPL(v3)
+# @Coding: utf-8
+
+# @Warning: Before using this script in Domogik is, run it in a terminal of
+#           your raspbian Jessie on your Raspberry PI 2 system.
+#
+#           This script is licensed under the GPL. The author does not 
+#           guarantee results and can not be held responsible for damage 
+#           to your systems.
+#
+##############################################################################
+#
+# Return true(1) if ping PTR is ok else return false(0)
+# PTR is IP or domain.tld
+# 
+# Usage :
+# ./sensor_ifping google.com
+#
+##############################################################################
+## prerequisites commands 
+
+## ping
+ 
+## constants exit code 
+
+E_OK=0
+E_ERROR=1
+
+## Variable init
+
+SCRIPTNAME=$(basename $0)
+
+## Main program
+
+PING=$(which ping)
+if [ ! ${PING} ]; then
+ echo "Error ${SCRIPTNAME} : No command system found !"
+ echo "sudo apt-get install ping";
+ echo "for more informations to install it."
+ exit ${E_ERROR}
+fi
+
+if [ $# -eq 0 ]; then
+ echo -n "0";
+ exit ${E_ERROR}
+fi
+
+PTR="${1}"
+${PING} -c 1 ${PTR} &> /dev/null && PING=1 || PING=0
+# TRUE=1  FALSE=0
+echo -n "${PING}"
+
+exit ${E_OK}
+
