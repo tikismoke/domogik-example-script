@@ -19,9 +19,11 @@
 # URL is a streaming of web radio
 # 
 # Usage :
-# ./action_webradio URLWEBRADIO
+# ./webradio URLWEBRADIO
 # or
-  # ./action_webradio stop | haut | bas | plushaut | plusbas | volume
+# ./webradio
+# and after
+  # ./webradio stop | haut | bas | plushaut | plusbas | volume
 #
 ##############################################################################
 E_OK=1
