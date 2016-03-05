@@ -1,0 +1,13 @@
+#!/bin/bash
+
+chaine="$1"
+if [ "$chaine" == "" ];then
+  chaine="rien a dire"
+fi
+
+/usr/bin/pico2wave -l fr-FR -w "/tmp/record.wav" "$chaine"
+/usr/bin/aplay /tmp/record.wav
+rm -f /tmp/record.wav
+
+exit 0
+

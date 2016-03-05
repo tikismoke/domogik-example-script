@@ -1,0 +1,122 @@
+#!/bin/bash
+
+##############################################################################
+# @Author : zadmalck <zadmalck at gmail.com>
+# @Purpose: Script for Domogik device for plugin script
+# @Copyleft: (C) 2015 by zadmalck
+# @license: GPL(v3)
+# @Coding: utf-8
+
+# @Warning: Before using this script in Domogik is, run it in a terminal of
+#           your raspbian Jessie on your Raspberry PI 2 system.
+#
+#           This script is licensed under the GPL. The author does not 
+#           guarantee results and can not be held responsible for damage 
+#           to your systems.
+#
+##############################################################################
+#
+# URL is a streaming of web radio
+# 
+# Usage :
+# ./action_webradio URLWEBRADIO
+# or
+  # ./action_webradio stop | haut | bas | plushaut | plusbas | volume
+#
+##############################################################################
+E_OK=1
+E_ERROR=0
+INCVOLUME=1
+INCVOLUMEPLUS=10
+
+SCRIPTNAME=$(basename $0)
+CHERIE_URL="http://95.81.155.24/8473/nrj_178499.mp3"
+DEFAULT_URL="http://streaming.hotmix-radio.net/hotmixradio-lounge-128.mp3"
+HOTMIX_URL="http://streaming.hotmix-radio.net/hotmixradio-lounge-128.mp3"
+
+KILLALL=$(which killall)
+AMIXER=$(which amixer)
+GREP=$(which grep)
+AWK=$(which awk)
+
+MPG=$(which mpg123)
+if [ ! ${MPG} ]; then
+ echo "Error ${SCRIPTNAME} : No command system found !"
+ echo "sudo apt-get install mpg321";
+ echo "for install it."
+ exit ${E_ERROR}
+fi
+
+AMIXER=$(which amixer)
+if [ ! ${AMIXER} ]; then
+ echo "Error ${SCRIPTNAME} : No command system found !"
+ echo "sudo apt-get install amixer";
+ echo "for install it."
+ exit ${E_ERROR}
+fi
+
+if [ $# -eq 0 ]; then
+ PARAM="${DEFAULT_URL}"
+else
+ PARAM="${1}"
+fi
+
+AMIXERDEVICE=$(${AMIXER} | ${GREP} "control" | ${AWK} -F"'" '{print $2}')
+CURRENTVOLUME=$(${AMIXER} scontents | ${GREP} "%]" | ${AWK} -F"%]" '{print $1}' | ${AWK} -F"[" '{print $2}')
+CURRENTVOLUME=$(expr $CURRENTVOLUME + 0)
+
+case "${PARAM}" in
+
+  cherie)     ${KILLALL} -q mpg123 > /dev/null
+              CURRENT_URL=${CHERIE_URL}
+              ${MPG} -q ${CURENT_URL} & > /dev/null
+            ;;
+  hotmix)     ${KILLALL} -q mpg123 > /dev/null
+              CURRENT_URL=${HOTMIX_URL}
+              ${MPG} -q ${CURRENT_URL} & > /dev/null
+            ;;
+  stop)     ${KILLALL} -q mpg123 > /dev/null
+            if [ ! -f /tmp/webradio.stop ]; then
+             touch /tmp/webradio.stop
+            fi
+            ;;
+  bas)   CURRENTVOLUME=$(expr $CURRENTVOLUME - $INCVOLUME)
+            if [ ! ${CURRENTVOLUME} -ge 0 ]; then
+             CURRENTVOLUME=0
+            fi
+            ${AMIXER} set ${AMIXERDEVICE} ${CURRENTVOLUME}% > /dev/null
+             ;;
+  haut)   CURRENTVOLUME=$(expr $CURRENTVOLUME + $INCVOLUME)
+            if [ ${CURRENTVOLUME} -gt 100 ]; then
+             CURRENTVOLUME=100
+            fi
+            ${AMIXER} set ${AMIXERDEVICE} ${CURRENTVOLUME}% > /dev/null
+             ;;
+
+  plushaut) CURRENTVOLUME=$(expr $CURRENTVOLUME + $INCVOLUME2)
+            if [ ! ${CURRENTVOLUME} -gt 100 ]; then
+             CURRENTVOLUME=100
+            fi           
+            ${AMIXER} set ${AMIXERDEVICE} ${CURRENTVOLUME}% > /dev/null
+             ;;
+
+  plusbas)  CURRENTVOLUME=$(expr $CURRENTVOLUME - $INCVOLUME2)
+            if [ ! ${CURRENTVOLUME} -ge 0 ]; then
+             CURRENTVOLUME=0
+            fi
+            ${AMIXER} set ${AMIXERDEVICE} ${CURRENTVOLUME}% > /dev/null
+             ;;
+
+  volume)   CURRENTVOLUME=$(expr $CURRENTVOLUME + 0)
+            echo -n "${CURRENTVOLUME}"
+             ;;
+
+  *) ${KILLALL} -q mpg123 > /dev/null
+     ${MPG} -q ${PARAM} & > /dev/null
+     if [  -f /tmp/webradio.stop ]; then
+      rm /tmp/webradio.stop
+     fi
+    ;;
+esac
+
+exit ${E_OK}

@@ -1,0 +1,46 @@
+#!/bin/bash
+
+##############################################################################
+# @Author : zadmalck <zadmalck at gmail.com>
+# @Purpose: Script for Domogik device for plugin script
+# @Copyleft: (C) 2015 by zadmalck
+# @license: GPL(v3)
+# @Coding: utf-8
+
+# @Warning: Before using this script in Domogik is, run it in a terminal of
+#           your raspbian Jessie on your Raspberry PI 2 system.
+#
+#           This script is licensed under the GPL. The author does not 
+#           guarantee results and can not be held responsible for damage 
+#           to your systems.
+#
+##############################################################################
+
+# Ce script permet de commander la fermeture ou l'ouverture
+# de tous les stores par les gpio.
+# remarque: j'ai l'habitude de mettre mes scripts dans /env/
+
+DELAY=2
+
+if [ $# -ne 1 ];then
+ echo "Usage : parametre obligatoire : haut | bas"
+ exit 1
+fi
+
+# volet 1
+/env/store 0203 $1
+sleep $DELAY
+
+# volet 2
+/env/store 0405 $1
+sleep $DELAY
+
+# volet 3
+/env/store 0006 $1
+sleep $DELAY
+
+# volet 4
+/env/store 2527 $1
+sleep $DELAY
+
+exit 0

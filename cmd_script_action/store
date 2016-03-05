@@ -1,0 +1,72 @@
+#!/bin/bash
+
+##############################################################################
+# @Author : zadmalck <zadmalck at gmail.com>
+# @Purpose: Script for Domogik device for plugin script
+# @Copyleft: (C) 2015 by zadmalck
+# @license: GPL(v3)
+# @Coding: utf-8
+
+# @Warning: Before using this script in Domogik is, run it in a terminal of
+#           your raspbian Jessie on your Raspberry PI 2 system.
+#
+#           This script is licensed under the GPL. The author does not 
+#           guarantee results and can not be held responsible for damage 
+#           to your systems.
+#
+##############################################################################
+
+# Ce script permet de commander des stores par les gpio.
+# remarque: j'ai l'habitude de mettre mes scripts dans /env/
+
+TRUE=0
+FALSE=1
+BAS=4
+HAUT=5
+# Duree appui bouton
+TIMEBUTTON=0.5
+
+function sendcommand
+{
+local idgpioCurrent 
+idgpioCurrent="${1}"
+gpio mode $idgpioCurrent out
+gpio write $idgpioCurrent $FALSE
+gpio write $idgpioCurrent $TRUE
+sleep ${TIMEBUTTON}
+gpio write $idgpioCurrent $FALSE
+gpio mode $idgpioCurrent in
+echo $(gpio read $idgpioCurrent)
+}
+
+# Main
+
+if [ ! $# -eq 2 ]; then
+ echo "Usage : NoGPIObasNoGPIOhaut Bas|Haut"
+ echo "Exemple : GPIO bas 24, GPIO haut 22 :"
+ echo "store 2422 bas"
+ echo "store 2422 haut"
+ exit $FALSE
+fi
+
+IDVOLET=${1}
+LG=$(expr length $IDVOLET)
+if [ ! $LG -eq 4 ]; then
+ echo "Erreur : 4 chiffres requis"
+ exit $FALSE
+fi
+
+CMDE=${2}
+
+case "$CMDE" in
+  bas) idvoletbas=${IDVOLET:0:2} 
+       sendcommand ${idvoletbas}
+       ;;
+ haut) idvolethaut=${IDVOLET:2:2}
+      sendcommand ${idvolethaut}  
+      ;;
+    *)
+      ;;
+esac
+
+exit $TRUE
