@@ -95,14 +95,14 @@ case "${PARAM}" in
             ${AMIXER} set ${AMIXERDEVICE} ${CURRENTVOLUME}% > /dev/null
              ;;
 
-  plushaut) CURRENTVOLUME=$(expr $CURRENTVOLUME + $INCVOLUME2)
+  plushaut) CURRENTVOLUME=$(expr $CURRENTVOLUME + $INCVOLUMEPLUS)
             if [ ! ${CURRENTVOLUME} -gt 100 ]; then
              CURRENTVOLUME=100
             fi           
             ${AMIXER} set ${AMIXERDEVICE} ${CURRENTVOLUME}% > /dev/null
              ;;
 
-  plusbas)  CURRENTVOLUME=$(expr $CURRENTVOLUME - $INCVOLUME2)
+  plusbas)  CURRENTVOLUME=$(expr $CURRENTVOLUME - $INCVOLUMEPLUS)
             if [ ! ${CURRENTVOLUME} -ge 0 ]; then
              CURRENTVOLUME=0
             fi
